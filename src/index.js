@@ -12,10 +12,13 @@ const users = [];
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
+  if(!username) 
+    return response.status(400).json({ error: 'username is required' });
+
   const user = users.find(user => user.username === username);
 
-  if(!user)
-    return response.status(400).json({error: "User not found"});
+  if(!user) 
+    return response.status(404).json({error: "User not found"});
 
   request.user = user;
 
@@ -28,7 +31,7 @@ function checksCreateTodosUserAvailability(request, response, next) {
   if(!user.pro)
   {
     if(user.todos.length === 10)
-      return response.status(400).json({error: "User already has 10 todos"});
+      return response.status(403).json({error: "User already has 10 todos"});
   }
 
   return next();
@@ -36,20 +39,26 @@ function checksCreateTodosUserAvailability(request, response, next) {
 
 function checksTodoExists(request, response, next) {
   const { username } = request.headers;
-  const { id } = response.params;
+  const { id } = request.params;
+
+  if (!id) 
+    return response.status(400).json({ error: 'id is required' });
+  
+  if(!username) 
+    return response.status(400).json({ error: 'username is required' });
 
   const user = users.find(user => user.username === username);
 
-  if(!user)
-    return response.status(400).json({error: "User not found"});
+  if(!user) 
+    return response.status(404).json({error: "User not found"});
 
-  if(!validate(id))
+  if(!validate(id)) 
     return response.status(400).json({error: "Id is not valid"});
 
   const todo = user.todos.find(todo => todo.id === id);
 
-  if(!todo)
-    return response.status(400).json({error: "Todo not found"});
+  if(!todo) 
+    return response.status(404).json({error: "Todo not found"});
 
   request.user = user;
   request.todo = todo;
@@ -60,13 +69,13 @@ function checksTodoExists(request, response, next) {
 function findUserById(request, response, next) {
   const { id } = request.params;
 
-  if(!validate(id))
-    return response.status(400).json({error: "Id is not valid"});
+  if (!id) 
+    return response.status(400).json({ error: 'id is required' });
 
   const user = users.find(user => user.id === id);
   
-  if(!user)
-    return response.status(400).json({error: "User not found"});
+  if(!user) 
+    return response.status(404).json({error: "User not found"});
 
   request.user = user;
 
